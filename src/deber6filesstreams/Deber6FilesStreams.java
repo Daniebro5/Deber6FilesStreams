@@ -7,6 +7,7 @@ package deber6filesstreams;
 
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -55,45 +56,44 @@ public class Deber6FilesStreams extends Application {
         Button openButton = new Button("Seleccionar Archivo");
 
         TableView<Laptop> table = new TableView<Laptop>();
-        
+
         table.setEditable(false);
 
         TableColumn descripcionCol = new TableColumn("Descripcion");
         descripcionCol.setCellValueFactory(new PropertyValueFactory<>("descripcion"));
-        
+
         TableColumn discoCol = new TableColumn("Disco");
         discoCol.setCellValueFactory(new PropertyValueFactory<>("disco"));
-        
+
         TableColumn estrellasCol = new TableColumn("Estrellas");
         estrellasCol.setCellValueFactory(new PropertyValueFactory<>("estrellas"));
-        
+
         TableColumn marcaCol = new TableColumn("Marca");
         marcaCol.setCellValueFactory(new PropertyValueFactory<>("marca"));
-        
+
         TableColumn memoriaCol = new TableColumn("Memoria");
         memoriaCol.setCellValueFactory(new PropertyValueFactory<>("memoria"));
-        
+
         TableColumn precioCol = new TableColumn("Precio");
         precioCol.setCellValueFactory(new PropertyValueFactory<>("precio"));
-        
 
         table.getColumns().addAll(descripcionCol, discoCol, estrellasCol, marcaCol, memoriaCol, precioCol);
-        
+
         Button filterButton = new Button("Filtrar");
         filterButton.setOnAction(
                 new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent event) {
                 filteredLaptops.removeAll(filteredLaptops);
-                for(Laptop laptop : laptops) {
-                    if(laptop.getPrecio() > 1000) {
+                for (Laptop laptop : laptops) {
+                    if (laptop.getPrecio() > 1000) {
                         filteredLaptops.add(laptop);
                     }
                 }
                 table.setItems(filteredLaptops);
             }
         });
-        
+
         Button clearButton = new Button("Limpiar Filtros");
         clearButton.setOnAction(
                 new EventHandler<ActionEvent>() {
@@ -103,8 +103,7 @@ public class Deber6FilesStreams extends Application {
                 table.setItems(laptops);
             }
         });
-        
-        
+
         openButton.setOnAction(
                 new EventHandler<ActionEvent>() {
             @Override
@@ -114,7 +113,7 @@ public class Deber6FilesStreams extends Application {
                     System.out.println(file.getPath());
                     try (BufferedReader input = Files.newBufferedReader(Paths.get(file.getPath()))) {
                         GrupoLaptops grupo = JAXB.unmarshal(input, GrupoLaptops.class);
-                        for(Laptop laptop : grupo.getLaptops()) {
+                        for (Laptop laptop : grupo.getLaptops()) {
                             laptops.add(laptop);
                             filteredLaptops.add(laptop);
                         }
@@ -126,13 +125,65 @@ public class Deber6FilesStreams extends Application {
             }
         });
 
-        
+        Button saveButton = new Button("Limpiar Filtros");
+        saveButton.setOnAction(
+                new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent event) {
+                try {
+                    File myObj = new File("Laptop.txt");
+                    if (myObj.createNewFile()) {
+                        System.out.println("File created: " + myObj.getName());
+                    } else {
+                        System.out.println("File already exists.");
+                    }
+                } catch (IOException e) {
+                    System.out.println("An error occurred.");
+                    e.printStackTrace();
+                }
 
-        
-        
+                try {
+                    FileWriter myWriter = new FileWriter("Laptop.txt");
+                    
+                    int dim1 = 20;
+                    int dim2 = 40;
+                    
+                    for(Laptop laptop: laptops) {
+                        myWriter.write(laptop.marca);
+                        for(int espacio = 0; espacio < dim1 - laptop.marca.length(); espacio += 1) {
+                            myWriter.write(" ");
+                        }
+                        myWriter.write(laptop.descripcion);
+                        for(int espacio = 0; espacio < dim2 - laptop.descripcion.length(); espacio += 1) {
+                            myWriter.write(" ");
+                        }
+                        myWriter.write(Integer.toString(laptop.memoria));
+                        myWriter.write("\t");
+                        myWriter.write(laptop.disco);
+                        myWriter.write("\t");
+                        myWriter.write("$" + Double.toString(laptop.precio));
+                        myWriter.write("\t");
+                        for(int estrella = 1; estrella <= laptop.estrellas; estrella += 1) {
+                            myWriter.write("*");
+                        }
+                        
+                        
+                        myWriter.write("\n");
+                    }
+                    
+                    
+                    myWriter.close();
+                    System.out.println("Successfully wrote to the file.");
+                } catch (IOException e) {
+                    System.out.println("An error occurred.");
+                    e.printStackTrace();
+                }
+
+            }
+        });
 
         VBox vBox = new VBox();
-        vBox.getChildren().addAll(openButton, table, filterButton, clearButton);
+        vBox.getChildren().addAll(openButton, table, filterButton, clearButton, saveButton);
 
         primaryStage.setScene(new Scene(vBox));
         primaryStage.show();

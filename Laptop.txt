@@ -1,0 +1,20 @@
+DELL                XPS 15 7590                             16	1T	$1549.99	****
+HP                  Spectre360 32                           32	512G	$1399.99	*****
+Lenovo              ThinkBook 14 Gen 2 (14”) Intel          8	256G	$694.99	*****
+Lenovo              ThinkPad E14 Gen 2 (14”)                4	1T	$914.39	****
+Acer                Acer Aspire 5 (Core i3)                 32	512G	$899.0	****
+Apple               Apple MacBook Pro (13-inch)             8	256G	$630.0	****
+Asus                Asus Chromebook C434                    8	64G	$599.0	***
+HP                  HP Envy 13t                             8	256G	$899.0	****
+Acer                Acer Swift 7                            16	512G	$1086.0	***
+HP                  HP Spectre x360                         8	256G	$1149.0	*****
+Lenovo              Lenovo ThinkPad X1 Carbon               16	1T	$1399.99	****
+Samsung             Samsung Chromebook 3                    4	64G	$264.0	****
+Microsoft           Microsoft Surface Laptop 3              8	256G	$849.99	*****
+Apple               Apple MacBook Pro                       16	512G	$2199.0	****
+Dell                Dell XPS 15                             32	1T	$2199.0	*****
+Asus                Asus ZenBook Pro Duo                    16	1T	$2275.63	****
+HP                  HP Spectre x360 13                      16	512G	$1475.95	*****
+Lenovo              Yoga 9i (15”) 2 in 1 laptop             12	512G	$1499.99	*****
+Lenovo              ThinkPad X1 Nano (13”) Laptop           16	1T	$2197.3	*****
+Lenovo              Legion Y540 15”                         32	1T	$1329.99	*****
