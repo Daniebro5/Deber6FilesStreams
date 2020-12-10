@@ -10,16 +10,21 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javafx.application.Application;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
+import javafx.collections.transformation.FilteredList;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
+import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
@@ -37,6 +42,9 @@ public class Deber6FilesStreams extends Application {
     @Override
     public void start(Stage primaryStage) {
 
+        ObservableList<Laptop> laptops = FXCollections.observableArrayList();
+        ObservableList<Laptop> filteredLaptops = FXCollections.observableArrayList();
+
         primaryStage.setTitle("Deber 6");
 
         FileChooser fileChooser = new FileChooser();
@@ -46,6 +54,57 @@ public class Deber6FilesStreams extends Application {
 
         Button openButton = new Button("Seleccionar Archivo");
 
+        TableView<Laptop> table = new TableView<Laptop>();
+        
+        table.setEditable(false);
+
+        TableColumn descripcionCol = new TableColumn("Descripcion");
+        descripcionCol.setCellValueFactory(new PropertyValueFactory<>("descripcion"));
+        
+        TableColumn discoCol = new TableColumn("Disco");
+        discoCol.setCellValueFactory(new PropertyValueFactory<>("disco"));
+        
+        TableColumn estrellasCol = new TableColumn("Estrellas");
+        estrellasCol.setCellValueFactory(new PropertyValueFactory<>("estrellas"));
+        
+        TableColumn marcaCol = new TableColumn("Marca");
+        marcaCol.setCellValueFactory(new PropertyValueFactory<>("marca"));
+        
+        TableColumn memoriaCol = new TableColumn("Memoria");
+        memoriaCol.setCellValueFactory(new PropertyValueFactory<>("memoria"));
+        
+        TableColumn precioCol = new TableColumn("Precio");
+        precioCol.setCellValueFactory(new PropertyValueFactory<>("precio"));
+        
+
+        table.getColumns().addAll(descripcionCol, discoCol, estrellasCol, marcaCol, memoriaCol, precioCol);
+        
+        Button filterButton = new Button("Filtrar");
+        filterButton.setOnAction(
+                new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent event) {
+                filteredLaptops.removeAll(filteredLaptops);
+                for(Laptop laptop : laptops) {
+                    if(laptop.getPrecio() > 1000) {
+                        filteredLaptops.add(laptop);
+                    }
+                }
+                table.setItems(filteredLaptops);
+            }
+        });
+        
+        Button clearButton = new Button("Limpiar Filtros");
+        clearButton.setOnAction(
+                new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent event) {
+                filteredLaptops.removeAll(filteredLaptops);
+                table.setItems(laptops);
+            }
+        });
+        
+        
         openButton.setOnAction(
                 new EventHandler<ActionEvent>() {
             @Override
@@ -55,31 +114,25 @@ public class Deber6FilesStreams extends Application {
                     System.out.println(file.getPath());
                     try (BufferedReader input = Files.newBufferedReader(Paths.get(file.getPath()))) {
                         GrupoLaptops grupo = JAXB.unmarshal(input, GrupoLaptops.class);
-                        for(Laptop laptop: grupo.getLaptops()) {
-                            System.out.println(laptop.descripcion);
+                        for(Laptop laptop : grupo.getLaptops()) {
+                            laptops.add(laptop);
+                            filteredLaptops.add(laptop);
                         }
+                        table.setItems(laptops);
                     } catch (IOException ex) {
                         Logger.getLogger(Deber6FilesStreams.class.getName()).log(Level.SEVERE, null, ex);
                     }
                 }
             }
-        }
-        );
+        });
 
-        TableView table = new TableView();
-        table.setEditable(false);
+        
 
-        TableColumn descripcionCol = new TableColumn("Descripcion");
-        TableColumn discoCol = new TableColumn("Disco");
-        TableColumn estrellasCol = new TableColumn("Estrellas");
-        TableColumn marcaCol = new TableColumn("Marca");
-        TableColumn memoriaCol = new TableColumn("Memoria");
-        TableColumn precioCol = new TableColumn("Precio");
-
-        table.getColumns().addAll(descripcionCol, discoCol, estrellasCol, marcaCol, memoriaCol, precioCol);
+        
+        
 
         VBox vBox = new VBox();
-        vBox.getChildren().addAll(openButton, table);
+        vBox.getChildren().addAll(openButton, table, filterButton, clearButton);
 
         primaryStage.setScene(new Scene(vBox));
         primaryStage.show();
