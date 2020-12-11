@@ -13,6 +13,7 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Predicate;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javafx.application.Application;
@@ -23,6 +24,7 @@ import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
+import javafx.scene.control.CheckBox;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.cell.PropertyValueFactory;
@@ -39,12 +41,19 @@ import javax.xml.bind.JAXB;
  * @author dannibrito
  */
 public class Deber6FilesStreams extends Application {
+    
+    ObservableList<Laptop> laptops = FXCollections.observableArrayList();
+    FilteredList<Laptop> filteredLaptops;
+    
+    
 
     @Override
     public void start(Stage primaryStage) {
 
-        ObservableList<Laptop> laptops = FXCollections.observableArrayList();
-        ObservableList<Laptop> filteredLaptops = FXCollections.observableArrayList();
+        
+        
+        
+        // arraylist<string> marcas;
 
         primaryStage.setTitle("Deber 6");
 
@@ -79,30 +88,9 @@ public class Deber6FilesStreams extends Application {
 
         table.getColumns().addAll(descripcionCol, discoCol, estrellasCol, marcaCol, memoriaCol, precioCol);
 
-        Button filterButton = new Button("Filtrar");
-        filterButton.setOnAction(
-                new EventHandler<ActionEvent>() {
-            @Override
-            public void handle(ActionEvent event) {
-                filteredLaptops.removeAll(filteredLaptops);
-                for (Laptop laptop : laptops) {
-                    if (laptop.getPrecio() > 1000) {
-                        filteredLaptops.add(laptop);
-                    }
-                }
-                table.setItems(filteredLaptops);
-            }
-        });
+        
 
-        Button clearButton = new Button("Limpiar Filtros");
-        clearButton.setOnAction(
-                new EventHandler<ActionEvent>() {
-            @Override
-            public void handle(ActionEvent event) {
-                filteredLaptops.removeAll(filteredLaptops);
-                table.setItems(laptops);
-            }
-        });
+        
 
         openButton.setOnAction(
                 new EventHandler<ActionEvent>() {
@@ -112,12 +100,15 @@ public class Deber6FilesStreams extends Application {
                 if (file != null) {
                     System.out.println(file.getPath());
                     try (BufferedReader input = Files.newBufferedReader(Paths.get(file.getPath()))) {
+                        // https://www.baeldung.com/jaxb
                         GrupoLaptops grupo = JAXB.unmarshal(input, GrupoLaptops.class);
                         for (Laptop laptop : grupo.getLaptops()) {
                             laptops.add(laptop);
-                            filteredLaptops.add(laptop);
                         }
-                        table.setItems(laptops);
+                        
+                        filteredLaptops = new FilteredList<>(laptops);
+                        
+                        table.setItems(filteredLaptops);
                     } catch (IOException ex) {
                         Logger.getLogger(Deber6FilesStreams.class.getName()).log(Level.SEVERE, null, ex);
                     }
@@ -125,7 +116,7 @@ public class Deber6FilesStreams extends Application {
             }
         });
 
-        Button saveButton = new Button("Limpiar Filtros");
+        Button saveButton = new Button("Guardar");
         saveButton.setOnAction(
                 new EventHandler<ActionEvent>() {
             @Override
@@ -148,7 +139,7 @@ public class Deber6FilesStreams extends Application {
                     int dim1 = 20;
                     int dim2 = 40;
                     
-                    for(Laptop laptop: laptops) {
+                    for(Laptop laptop: filteredLaptops) {
                         myWriter.write(laptop.marca);
                         for(int espacio = 0; espacio < dim1 - laptop.marca.length(); espacio += 1) {
                             myWriter.write(" ");
@@ -181,9 +172,67 @@ public class Deber6FilesStreams extends Application {
 
             }
         });
+        
+        
+        
+        
+        CheckBox appleCheckbox = new CheckBox("Apple");
+        CheckBox lenovoCheckbox = new CheckBox("Lenovo");
+        CheckBox hpCheckbox = new CheckBox("HP");
+        CheckBox dellCheckbox = new CheckBox("DELL");
+        
+        Button filterButton = new Button("Filtrar");
+        filterButton.setOnAction(
+                new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent event) {
+                
+                
+                Predicate<Laptop> checkBoxesFilter = i -> false;
+                
+                if(appleCheckbox.isSelected()) {
+                    Predicate<Laptop> appleFilter = i -> i.getMarca().compareTo("Apple") == 0;
+                    checkBoxesFilter = checkBoxesFilter.or(appleFilter);
+                } 
+                
+                if(lenovoCheckbox.isSelected()) {
+                    Predicate<Laptop> lenovoFilter = i -> i.getMarca().compareTo("Lenovo") == 0;
+                    checkBoxesFilter = checkBoxesFilter.or(lenovoFilter);
+                }
+                
+                if(hpCheckbox.isSelected()) {
+                    Predicate<Laptop> hpFilter = i -> i.getMarca().compareTo("HP") == 0;
+                    checkBoxesFilter = checkBoxesFilter.or(hpFilter);
+                }
+                
+                if(dellCheckbox.isSelected()) {
+                    Predicate<Laptop> dellFilter = i -> i.getMarca().compareTo("DELL") == 0;
+                    checkBoxesFilter = checkBoxesFilter.or(dellFilter);
+                }
+                
+                filteredLaptops.setPredicate(checkBoxesFilter);
+                
+            }
+        });
+        
+        Button clearButton = new Button("Limpiar Filtros");
+        clearButton.setOnAction(
+                new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent event) {
+                filteredLaptops.setPredicate(null);
+                
+                appleCheckbox.setSelected(false);
+       lenovoCheckbox.setSelected(false);
+        hpCheckbox.setSelected(false);
+        dellCheckbox.setSelected(false);
+                
+            }
+        });
+        
 
         VBox vBox = new VBox();
-        vBox.getChildren().addAll(openButton, table, filterButton, clearButton, saveButton);
+        vBox.getChildren().addAll(openButton, table, filterButton, clearButton, saveButton, appleCheckbox, lenovoCheckbox, hpCheckbox, dellCheckbox);
 
         primaryStage.setScene(new Scene(vBox));
         primaryStage.show();
@@ -225,10 +274,6 @@ public class Deber6FilesStreams extends Application {
         return ordenado;
     }
 
-    public void imprimirLaptops(Laptop laptops[]) {
-        for (Laptop laptop : laptops) {
-            System.out.println(laptop.precio);
-        }
-    }
+    
 
 }
