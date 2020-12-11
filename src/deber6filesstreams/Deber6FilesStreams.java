@@ -44,7 +44,7 @@ public class Deber6FilesStreams extends Application {
 
     ObservableList<Laptop> laptops = FXCollections.observableArrayList();
     FilteredList<Laptop> filteredLaptops;
-
+    
     @Override
     public void start(Stage primaryStage) {
 
@@ -211,7 +211,6 @@ public class Deber6FilesStreams extends Application {
                     memFilter = memFilter.or(mem32Filter);
                 }
                 
-                
                 Predicate<Laptop> master = checkBoxesFilter.and(memFilter);
                 
                 filteredLaptops.setPredicate(master);
@@ -248,33 +247,8 @@ public class Deber6FilesStreams extends Application {
     public static void main(String[] args) {
         launch(args);
     }
-
-    public Laptop[] ordenarPorPrecio(boolean ascendente, Laptop[] laptops) {
-        Laptop ordenado[] = laptops;
-
-        if (ascendente) {
-            for (int i = 0; i < laptops.length; i++) {
-                for (int j = 1; j < laptops.length - i; j++) {
-                    if (ordenado[j - 1].precio > ordenado[j].precio) {
-                        Laptop aux = ordenado[j - 1];
-                        ordenado[j - 1] = ordenado[j];
-                        ordenado[j] = aux;
-                    }
-                }
-            }
-        } else {
-            for (int i = 0; i < laptops.length; i++) {
-                for (int j = 1; j < laptops.length - i; j++) {
-                    if (ordenado[j - 1].precio < ordenado[j].precio) {
-                        Laptop aux = ordenado[j - 1];
-                        ordenado[j - 1] = ordenado[j];
-                        ordenado[j] = aux;
-                    }
-                }
-            }
-        }
-
-        return ordenado;
-    }
-
+    
+    
+    
+    
 }
