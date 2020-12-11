@@ -41,20 +41,14 @@ import javax.xml.bind.JAXB;
  * @author dannibrito
  */
 public class Deber6FilesStreams extends Application {
-    
+
     ObservableList<Laptop> laptops = FXCollections.observableArrayList();
     FilteredList<Laptop> filteredLaptops;
-    
-    
 
     @Override
     public void start(Stage primaryStage) {
 
-        
-        
-        
         // arraylist<string> marcas;
-
         primaryStage.setTitle("Deber 6");
 
         FileChooser fileChooser = new FileChooser();
@@ -88,10 +82,6 @@ public class Deber6FilesStreams extends Application {
 
         table.getColumns().addAll(descripcionCol, discoCol, estrellasCol, marcaCol, memoriaCol, precioCol);
 
-        
-
-        
-
         openButton.setOnAction(
                 new EventHandler<ActionEvent>() {
             @Override
@@ -105,9 +95,9 @@ public class Deber6FilesStreams extends Application {
                         for (Laptop laptop : grupo.getLaptops()) {
                             laptops.add(laptop);
                         }
-                        
+
                         filteredLaptops = new FilteredList<>(laptops);
-                        
+
                         table.setItems(filteredLaptops);
                     } catch (IOException ex) {
                         Logger.getLogger(Deber6FilesStreams.class.getName()).log(Level.SEVERE, null, ex);
@@ -135,17 +125,17 @@ public class Deber6FilesStreams extends Application {
 
                 try {
                     FileWriter myWriter = new FileWriter("Laptop.txt");
-                    
+
                     int dim1 = 20;
                     int dim2 = 40;
-                    
-                    for(Laptop laptop: filteredLaptops) {
+
+                    for (Laptop laptop : filteredLaptops) {
                         myWriter.write(laptop.marca);
-                        for(int espacio = 0; espacio < dim1 - laptop.marca.length(); espacio += 1) {
+                        for (int espacio = 0; espacio < dim1 - laptop.marca.length(); espacio += 1) {
                             myWriter.write(" ");
                         }
                         myWriter.write(laptop.descripcion);
-                        for(int espacio = 0; espacio < dim2 - laptop.descripcion.length(); espacio += 1) {
+                        for (int espacio = 0; espacio < dim2 - laptop.descripcion.length(); espacio += 1) {
                             myWriter.write(" ");
                         }
                         myWriter.write(Integer.toString(laptop.memoria));
@@ -154,15 +144,13 @@ public class Deber6FilesStreams extends Application {
                         myWriter.write("\t");
                         myWriter.write("$" + Double.toString(laptop.precio));
                         myWriter.write("\t");
-                        for(int estrella = 1; estrella <= laptop.estrellas; estrella += 1) {
+                        for (int estrella = 1; estrella <= laptop.estrellas; estrella += 1) {
                             myWriter.write("*");
                         }
-                        
-                        
+
                         myWriter.write("\n");
                     }
-                    
-                    
+
                     myWriter.close();
                     System.out.println("Successfully wrote to the file.");
                 } catch (IOException e) {
@@ -172,67 +160,82 @@ public class Deber6FilesStreams extends Application {
 
             }
         });
-        
-        
-        
-        
+
         CheckBox appleCheckbox = new CheckBox("Apple");
         CheckBox lenovoCheckbox = new CheckBox("Lenovo");
         CheckBox hpCheckbox = new CheckBox("HP");
         CheckBox dellCheckbox = new CheckBox("DELL");
-        
+        CheckBox mem32Checkbox = new CheckBox("32 de memoria");
+
         Button filterButton = new Button("Filtrar");
         filterButton.setOnAction(
                 new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent event) {
+
                 
+                Predicate<Laptop> checkBoxesFilter = i -> true;
                 
-                Predicate<Laptop> checkBoxesFilter = i -> false;
-                
-                if(appleCheckbox.isSelected()) {
+                if (appleCheckbox.isSelected() || lenovoCheckbox.isSelected() || hpCheckbox.isSelected() || dellCheckbox.isSelected()) {
+                    checkBoxesFilter = i -> false;
+                }
+
+                if (appleCheckbox.isSelected()) {
                     Predicate<Laptop> appleFilter = i -> i.getMarca().compareTo("Apple") == 0;
                     checkBoxesFilter = checkBoxesFilter.or(appleFilter);
-                } 
-                
-                if(lenovoCheckbox.isSelected()) {
+                }
+
+                if (lenovoCheckbox.isSelected()) {
                     Predicate<Laptop> lenovoFilter = i -> i.getMarca().compareTo("Lenovo") == 0;
                     checkBoxesFilter = checkBoxesFilter.or(lenovoFilter);
                 }
-                
-                if(hpCheckbox.isSelected()) {
+
+                if (hpCheckbox.isSelected()) {
                     Predicate<Laptop> hpFilter = i -> i.getMarca().compareTo("HP") == 0;
                     checkBoxesFilter = checkBoxesFilter.or(hpFilter);
                 }
-                
-                if(dellCheckbox.isSelected()) {
+
+                if (dellCheckbox.isSelected()) {
                     Predicate<Laptop> dellFilter = i -> i.getMarca().compareTo("DELL") == 0;
                     checkBoxesFilter = checkBoxesFilter.or(dellFilter);
                 }
                 
-                filteredLaptops.setPredicate(checkBoxesFilter);
+                Predicate<Laptop> memFilter = i -> true;
                 
+                if (mem32Checkbox.isSelected()) {
+                    memFilter = i -> false;
+                }
+                
+                if (mem32Checkbox.isSelected()) {
+                    Predicate<Laptop> mem32Filter = i -> i.getMemoria() == 32;
+                    memFilter = memFilter.or(mem32Filter);
+                }
+                
+                
+                Predicate<Laptop> master = checkBoxesFilter.and(memFilter);
+                
+                filteredLaptops.setPredicate(master);
+
             }
         });
-        
+
         Button clearButton = new Button("Limpiar Filtros");
         clearButton.setOnAction(
                 new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent event) {
                 filteredLaptops.setPredicate(null);
-                
+
                 appleCheckbox.setSelected(false);
-       lenovoCheckbox.setSelected(false);
-        hpCheckbox.setSelected(false);
-        dellCheckbox.setSelected(false);
-                
+                lenovoCheckbox.setSelected(false);
+                hpCheckbox.setSelected(false);
+                dellCheckbox.setSelected(false);
+
             }
         });
-        
 
         VBox vBox = new VBox();
-        vBox.getChildren().addAll(openButton, table, filterButton, clearButton, saveButton, appleCheckbox, lenovoCheckbox, hpCheckbox, dellCheckbox);
+        vBox.getChildren().addAll(openButton, table, filterButton, clearButton, saveButton, appleCheckbox, lenovoCheckbox, hpCheckbox, dellCheckbox, mem32Checkbox);
 
         primaryStage.setScene(new Scene(vBox));
         primaryStage.show();
@@ -273,7 +276,5 @@ public class Deber6FilesStreams extends Application {
 
         return ordenado;
     }
-
-    
 
 }
